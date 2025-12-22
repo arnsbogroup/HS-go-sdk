@@ -45,6 +45,7 @@ func (c *HeysenderClient) request(method, endpoint string, body interface{}) ([]
 	req.Header.Set("Authorization", "Basic "+credentials)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", "HS-go-sdk/0.9")
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
