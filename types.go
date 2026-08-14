@@ -30,7 +30,7 @@ func (d *Domain) UnmarshalJSON(data []byte) error {
 	switch v := aux.Validated.(type) {
 	case bool:
 		d.Validated = v
-	case int:
+	case float64:
 		d.Validated = v != 0
 	case string:
 		d.Validated = v == "1" || v == "true"
@@ -130,6 +130,17 @@ func (e AllSMTPUser) ToSMTPUser() SMTPUser {
 type CreateSMTPUserRequest struct {
 	SMTPEmail        string            `json:"smtp_email"`
 	AnonymizeOptions []AnonymizeOption `json:"anonymize_options,omitempty"`
+}
+
+// SMTPUserWithDomain represents the SMTP user returned by the get single user endpoint, which additionally eager-loads the parent domain
+type SMTPUserWithDomain struct {
+	AllSMTPUser
+	Domain *Domain `json:"domain,omitempty"`
+}
+
+// Converts SMTPUserWithDomain to normal SMTPUser struct
+func (e SMTPUserWithDomain) ToSMTPUser() SMTPUser {
+	return e.AllSMTPUser.ToSMTPUser()
 }
 
 // Webhook represents a webhook configuration

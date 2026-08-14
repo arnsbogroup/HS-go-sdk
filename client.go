@@ -45,7 +45,7 @@ func (c *HeysenderClient) request(method, endpoint string, body interface{}) ([]
 	req.Header.Set("Authorization", "Basic "+credentials)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "HS-go-sdk/0.9")
+	req.Header.Set("User-Agent", "HS-go-sdk/0.9.1")
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -83,6 +83,21 @@ func (c *HeysenderClient) GetDomains() ([]Domain, error) {
 	}
 
 	return domains, nil
+}
+
+// GetDomain retrieves a single domain
+func (c *HeysenderClient) GetDomain(domain string) (*Domain, error) {
+	data, err := c.request("GET", fmt.Sprintf("/api/domains/%s", domain), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var d Domain
+	if err := json.Unmarshal(data, &d); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal domain: %w", err)
+	}
+
+	return &d, nil
 }
 
 // CreateDomain creates a new domain
@@ -154,6 +169,21 @@ func (c *HeysenderClient) GetSMTPUsers(domainID int) ([]SMTPUser, error) {
 		users[i] = config.ToSMTPUser()
 	}
 	return users, nil
+}
+
+// GetSMTPUser retrieves a single SMTP user, including its parent domain
+func (c *HeysenderClient) GetSMTPUser(domainID, userID int) (*SMTPUserWithDomain, error) {
+	data, err := c.request("GET", fmt.Sprintf("/api/smtp/%d/%d", domainID, userID), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var user SMTPUserWithDomain
+	if err := json.Unmarshal(data, &user); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal SMTP user: %w", err)
+	}
+
+	return &user, nil
 }
 
 // CreateSMTPUser creates a new SMTP user
